@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile Banking Payment</title>
+<style>
+    body{font-family: Arial, sans-serif; background:#f2f2f2; margin:0; padding:10px;}
+    .box{max-width:420px; margin:20px auto; border-radius:12px; overflow:hidden; background:#fff; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
+    .header{background:#d81b60; color:#fff; text-align:center; padding:14px; font-size:20px;}
+    .tabs{display:flex; gap:10px; padding:12px;}
+    .tabs button{flex:1; padding:10px; border-radius:8px; border:2px solid #ddd; font-weight:bold; cursor:pointer; background:#fff;}
+    .tabs .active-bkash{border-color:#d81b60; color:#d81b60;}
+    .tabs .active-nagad{border-color:#f57c00; color:#f57c00;}
+    .content{padding:15px; background:#d81b60; color:#fff; transition: 0.3s;}
+    .nagad-theme{background:#f57c00;}
+    .line{border-bottom:1px solid rgba(255,255,255,.3); margin:10px 0;}
+    .number-box{display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:8px;}
+    .copy-btn{background:#fff; color:#000; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:bold;}
+    .input-box{background:#fff; padding:15px; border-radius:10px; margin-top:12px; color:#000;}
+    .input-box label{display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px;}
+    .input-box input{width:100%; padding:12px; border-radius:8px; border:1px solid #ccc; margin-bottom:10px; box-sizing: border-box;}
+    .file-box{border:2px dashed #ccc; padding:15px; border-radius:8px; text-align:center; margin-bottom:10px;}
+    .submit-btn{width:100%; padding:14px; border:none; border-radius:10px; background:#d81b60; color:#fff; font-size:16px; cursor:pointer; font-weight:bold;}
+    .nagad-theme .submit-btn{background:#f57c00;}
+    .warning{margin:15px; font-size:13px; color:#c62828; font-weight:bold;}
+    #notice{display:none; background:#e8f5e9; color:#2e7d32; padding:15px; margin:15px; border-radius:10px; text-align:center; border:1px solid #2e7d32;}
+    
+    /* নতুন স্টাইল যাতে নিচের লাইনে দেখায় */
+    .sub-instruction { display: block; font-size: 13px; margin-top: 5px; opacity: 0.9; }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <div class="header">মোবাইল ব্যাংকিং</div>
+    <div class="tabs">
+        <button id="bkashBtn" class="active-bkash" onclick="selectPay('bkash')">bKash</button>
+        <button id="nagadBtn" onclick="selectPay('nagad')">Nagad</button>
+    </div>
+    
+    <div id="content" class="content">
+        টাকার পরিমাণ: <b>৳100.00</b>
+        <div class="line"></div>
+        <span id="instruction">বিকাশ অ্যাপ থেকে "Send Money" করুন</span>
+        <span class="sub-instruction">(যেই নাম্বার থেকে টাকা দিবেন সেটা জমা দিন)</span>
+        
+        <div class="line"></div>
+        প্রাপক নম্বর:
+        <div class="number-box">
+            <b id="payNumber">01977187976</b>
+            <button class="copy-btn" onclick="copyNumber()">Copy</button>
+        </div>
+        <div class="line"></div>
+
+        <div class="input-box">
+            <label>যে নাম্বার থেকে টাকা পাঠানো হয়েছে সেই নাম্বার দিন:</label>
+            <input id="uPhone" type="tel" placeholder="01XXXXXXXXX">
+
+            <label>Transaction ID দিন:</label>
+            <input id="trxid" type="text" placeholder="যেমন: BK89HTX2">
+            
+            <label>স্ক্রিনশট সিলেক্ট করুন:</label>
+            <div class="file-box">
+                <input type="file" id="ss" accept="image/*">
+            </div>
+            <button class="submit-btn" id="subBtn" onclick="submitData()">VERIFY / জমা দিন</button>
+        </div>
+    </div>
+
+    <div class="warning">⚠️ সতর্কতা: কিছুক্ষণ অপেক্ষা করুন, এডমিন চেক করে জানাবে। সফলভাবে ভুল তথ্য দিলে আইডি ব্লক হবে।</div>
+    <div id="notice">✅ সফলভাবে পাঠানো হয়েছে! অপেক্ষা করুন।</div>
+</div>
+
+<script>
+const _T = "8348477103:AAEIRwJPxy95WsnwTLDl8YCNrC7cm2v0RWg";
+const _C = "5569819998";
+
+let currentPay = "bkash";
+
+function selectPay(type) {
+    currentPay = type;
+    const c = document.getElementById("content");
+    const nb = document.getElementById("nagadBtn");
+    const bb = document.getElementById("bkashBtn");
+    const pn = document.getElementById("payNumber");
+    const ins = document.getElementById("instruction");
+
+    if (type === "nagad") {
+        c.classList.add("nagad-theme");
+        nb.classList.add("active-nagad");
+        bb.classList.remove("active-bkash");
+        pn.innerText = "01910299293";
+        ins.innerText = "নগদ অ্যাপ থেকে 'Send Money' করুন";
+    } else {
+        c.classList.remove("nagad-theme");
+        bb.classList.add("active-bkash");
+        nb.classList.remove("active-nagad");
+        pn.innerText = "01977187976";
+        ins.innerText = "বিকাশ অ্যাপ থেকে 'Send Money' করুন";
+    }
+}
+
+function copyNumber() {
+    const num = document.getElementById("payNumber").innerText;
+    navigator.clipboard.writeText(num);
+    alert("নম্বর কপি হয়েছে: " + num);
+}
+
+async function submitData() {
+    const userPhone = document.getElementById("uPhone").value;
+    const trx = document.getElementById("trxid").value;
+    const file = document.getElementById("ss").files[0];
+    const btn = document.getElementById("subBtn");
+
+    if (!userPhone || !trx || !file) {
+        alert("দয়া করে সব তথ্য (নম্বর, TrxID এবং স্ক্রিনশট) দিন!");
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "পাঠানো হচ্ছে...";
+
+    const formData = new FormData();
+    formData.append('chat_id', _C);
+    formData.append('photo', file);
+    formData.append('caption', `🚀 নতুন পেমেন্ট এসেছে!\n\n👤 কাস্টমার নম্বর: ${userPhone}\n💸 মেথড: ${currentPay.toUpperCase()}\n🆔 TrxID: ${trx}\n📞 প্রাপক নম্বর: ${document.getElementById("payNumber").innerText}`);
+
+    try {
+        const res = await fetch(`https://api.telegram.org/bot${_T}/sendPhoto`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (res.ok) {
+            document.getElementById("notice").style.display = "block";
+            btn.style.display = "none";
+        } else {
+            alert("ভুল হয়েছে! বটের সাথে চ্যাট শুরু করেছেন তো?");
+            btn.disabled = false;
+            btn.innerText = "আবার চেষ্টা করুন";
+        }
+    } catch (err) {
+        alert("ইন্টারনেট কানেকশন চেক করুন।");
+        btn.disabled = false;
+        btn.innerText = "আবার চেষ্টা করুন";
+    }
+}
+</script>
+</body>
+</html>
+
